@@ -3,8 +3,9 @@ package kep.main.KEP.web;
 import kep.main.KEP.kafka.KafkaMessageReceiverProcessor;
 import kep.main.KEP.kafka.KafkaMessageSenderProcessor;
 import kep.main.KEP.model.KafkaMessage;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/messenger")
@@ -25,9 +26,7 @@ public class Messenger {
     }
 
     @GetMapping("/receive/{userId}")
-    public ConsumerRecords consumeMessage(@PathVariable Long userId) {
-         kafkaMessageReceiverProcessor.start(userId);
-
+    public List<KafkaMessage> consumeMessage(@PathVariable Long userId) {
          return kafkaMessageReceiverProcessor.receive(userId);
     }
 }

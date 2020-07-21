@@ -1,16 +1,17 @@
 package kep.main.KEP.kafka;
 
+import kep.main.KEP.model.KafkaMessage;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.config.TopicConfig;
-import org.apache.kafka.common.serialization.Serde;
+import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.kafka.connect.json.JsonSerializer;
 import org.apache.kafka.streams.StreamsConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
@@ -27,7 +28,7 @@ public class KafkaUtils {
 
 
     @Value(value = "${kafka.bootstrap.servers}")
-    public String bootstrapServers = "localhost:9092";
+    public String bootstrapServers = "127.0.0.1:9092";
 
     @Value(value = "${default.topic.replication.factor}")
     public String defaultReplicaitonFactor = "3";
@@ -46,19 +47,22 @@ public class KafkaUtils {
 
 
     public void init () throws ExecutionException, InterruptedException {
+        createTopicIfNotExist(messageTopicStorage, messageTopicStorageRetentionMS, defaultReplicaitonFactor);
+    }
 
+    public void createTopicIfNotExist(String topicName, Long messageTopicStorageRetentionMS, String defaultReplicaitonFactor) throws InterruptedException, ExecutionException {
         //make sure that only one thread can execute
         synchronized (createTopicLock) {
 
-            if (existingTopics.contains(messageTopicStorage)) {
-                boolean topicExists = kafkaAdmin.listTopics().names().get().contains(messageTopicStorage);
+            if (existingTopics.contains(topicName)) {
+                boolean topicExists = kafkaAdmin.listTopics().names().get().contains(topicName);
 
                 if(!topicExists) {
                     Map<String, String> topicConfMap = new HashMap<>();
                     topicConfMap.put(TopicConfig.RETENTION_MS_CONFIG, messageTopicStorageRetentionMS.toString());
                     topicConfMap.put(TopicConfig.CLEANUP_POLICY_CONFIG,  TopicConfig.CLEANUP_POLICY_DELETE);
                     int messageTopicStorageNumPartitions = 3;
-                    NewTopic topic = new NewTopic(messageTopicStorage, messageTopicStorageNumPartitions, Short.parseShort(defaultReplicaitonFactor))
+                    NewTopic topic = new NewTopic(topicName, messageTopicStorageNumPartitions, Short.parseShort(defaultReplicaitonFactor))
                             .configs(topicConfMap);
 
                     List<NewTopic> resultTopicList = new ArrayList<>();
@@ -70,7 +74,7 @@ public class KafkaUtils {
         }
     }
 
-    public KafkaProducer createKafkaProducer (String ack, Class<StringSerializer> keySerializer, Class<JsonSerializer> valueSerializer) {
+    public KafkaProducer<String, KafkaMessage> createKafkaProducer (String ack, Class<StringSerializer> keySerializer, Class<KafkaJsonSerializer> valueSerializer) {
         Properties producerProperties = new Properties();
 
         producerProperties.put(ProducerConfig.ACKS_CONFIG, ack);
@@ -79,20 +83,21 @@ public class KafkaUtils {
         producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializer);
         producerProperties.put(ProducerConfig.LINGER_MS_CONFIG, 1000);
         producerProperties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
-        return new KafkaProducer(producerProperties);
+        return new KafkaProducer<>(producerProperties);
     }
 
-    public KafkaConsumer createKafkaConsumer (String groupId, Class<StringDeserializer> keyDeserializer, Class<JsonDeserializer> valueDeserializer) {
+    public Consumer<String, KafkaMessage> createKafkaConsumer (String groupId, StringDeserializer keyDeserializer, JsonDeserializer valueDeserializer) {
         Properties consumerProperties = new Properties();
 
         consumerProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, keyDeserializer);
-        consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, valueDeserializer);
-        return new KafkaConsumer(consumerProperties);
+        consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        consumerProperties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
+        consumerProperties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 50);
+        return new KafkaConsumer<>(consumerProperties, keyDeserializer, valueDeserializer);
     }
 
-    public Properties createPropertiesKafkaStreams (String applicationId, Class<? extends Serde> keySerde, Class<? extends Serde> valueSerde, int threads) {
+    public Properties createPropertiesKafkaStreams (String applicationId, Class<Serdes.LongSerde> keySerde, Class<Serdes.StringSerde> valueSerde, int threads) {
         Properties streamProperties = new Properties();
 
         streamProperties.put(StreamsConfig.STATE_DIR_CONFIG, streamingStateStoreDir);

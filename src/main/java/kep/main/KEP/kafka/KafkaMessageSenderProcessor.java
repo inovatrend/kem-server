@@ -4,7 +4,6 @@ import kep.main.KEP.model.KafkaMessage;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.kafka.connect.json.JsonSerializer;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,8 +16,10 @@ public class KafkaMessageSenderProcessor {
     }
 
     public void startProducing(KafkaMessage kafkaMessage) {
-        KafkaProducer messageProducer = kafkaUtils.createKafkaProducer("all", StringSerializer.class, JsonSerializer.class);
+        KafkaProducer<String, KafkaMessage> messageProducer = kafkaUtils.createKafkaProducer("all", StringSerializer.class, KafkaJsonSerializer.class);
 
-        messageProducer.send(new ProducerRecord(kafkaUtils.messageTopicStorage, 3, kafkaMessage.receiverUserId, kafkaMessage));
+        messageProducer.send(new ProducerRecord<>(kafkaUtils.messageTopicStorage, kafkaMessage.receiverUserId.toString(), kafkaMessage));
+        messageProducer.flush();
+        messageProducer.close();
     }
 }
