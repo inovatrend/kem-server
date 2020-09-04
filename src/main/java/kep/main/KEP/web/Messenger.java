@@ -6,6 +6,7 @@ import kep.main.KEP.model.KafkaMessage;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/messenger")
@@ -21,12 +22,14 @@ public class Messenger {
 
 
     @RequestMapping("/send")
-    public void produceMessage(@RequestBody(required = false) KafkaMessage kafkaMessage) {
+    public void produceMessage(@RequestBody(required = false) KafkaMessage kafkaMessage) throws ExecutionException, InterruptedException {
         kafkaMessageSenderProcessor.startProducing(kafkaMessage);
+        kafkaMessageReceiverProcessor.start(kafkaMessage.senderUserId, kafkaMessage.receiverUserId);
     }
 
-    @GetMapping("/receive/{userId}")
-    public List<KafkaMessage> consumeMessage(@PathVariable Long userId) {
-         return kafkaMessageReceiverProcessor.receive(userId);
+    @GetMapping("/receive/{senderId}/{receiverId}")
+    public List<KafkaMessage> consumeMessage( @PathVariable Long senderId, @PathVariable Long receiverId) {
+//        kafkaMessageReceiverProcessor.start(senderId, receiverId);
+         return kafkaMessageReceiverProcessor.receive(senderId, receiverId);
     }
 }

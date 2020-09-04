@@ -6,6 +6,9 @@ import kep.main.KEP.service.UserManager;
 import kep.main.KEP.utils.UserUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -25,6 +28,25 @@ public class UserController {
         User user = userManager.getUser(userId);
 
         return userUtils.UserDTOMapper(user);
+    }
+
+    @GetMapping("/getByUsername")
+    private UserDTO getUserByUsername (@RequestParam String username) {
+
+        User user = userManager.getFullUserByUsername(username);
+
+        return userUtils.UserDTOMapper(user);
+    }
+
+    @GetMapping("/getAllUsers")
+    private List<UserDTO> getAllUsers () {
+        List<User> users = userManager.getAllUsers();
+        List<UserDTO> userDTOs = new ArrayList<>();
+
+        users.forEach(user -> {
+            userDTOs.add(userUtils.UserDTOMapper(user));
+        });
+        return userDTOs;
     }
 
     @PostMapping("/save")

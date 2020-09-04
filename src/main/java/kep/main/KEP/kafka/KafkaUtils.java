@@ -37,14 +37,12 @@ public class KafkaUtils {
     private String streamingStateStoreDir;
 
     String messageTopicStorage = "message-topic";
+    String messageTopicOut = "message-out-topic";
     Long messageTopicStorageRetentionMS = 15552000000L;
 
 
     private final ReentrantLock createTopicLock = new ReentrantLock();
     ConcurrentHashMap existingTopics  = new ConcurrentHashMap();
-
-
-
 
     public void init () throws ExecutionException, InterruptedException {
         createTopicIfNotExist(messageTopicStorage, messageTopicStorageRetentionMS, defaultReplicaitonFactor);
@@ -97,7 +95,7 @@ public class KafkaUtils {
         return new KafkaConsumer<>(consumerProperties, keyDeserializer, valueDeserializer);
     }
 
-    public Properties createPropertiesKafkaStreams (String applicationId, Class<Serdes.LongSerde> keySerde, Class<Serdes.StringSerde> valueSerde, int threads) {
+    public Properties createPropertiesKafkaStreams (String applicationId, Class<Serdes.StringSerde> keySerde, Class<Serdes.StringSerde> valueSerde, int threads) {
         Properties streamProperties = new Properties();
 
         streamProperties.put(StreamsConfig.STATE_DIR_CONFIG, streamingStateStoreDir);

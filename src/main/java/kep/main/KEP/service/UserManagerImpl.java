@@ -13,11 +13,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UserManagerImpl implements UserManager, UserDetailsService {
-    private static Logger logger = LogManager.getLogger(UserManagerImpl.class);
+    private static final Logger logger = LogManager.getLogger(UserManagerImpl.class);
     private final UserRepository userRepository;
     private final UserUtils userUtils;
 
@@ -31,6 +32,21 @@ public class UserManagerImpl implements UserManager, UserDetailsService {
         Optional<User> optionalUser = userRepository.findById(userId);
 
         return optionalUser.orElseGet(() -> (User) Optional.empty().get());
+    }
+
+    @Override
+    public User getFullUserByUsername(String username) {
+        User user = userRepository.findByUsername(username);
+        if (user != null) {
+            return user;
+        } else {
+            throw new UsernameNotFoundException("User" + username + "not found!");
+        }
+    }
+
+    @Override
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
     @Override
