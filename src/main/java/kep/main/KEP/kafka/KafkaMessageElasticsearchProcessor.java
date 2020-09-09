@@ -46,8 +46,6 @@ public class KafkaMessageElasticsearchProcessor {
             consumerRecords.forEach(crv -> {
                 kafkaElasticsearchManager.saveToElastic(crv.value());
             });
-        } else {
-            consumer.wakeup();
         }
     }
 
