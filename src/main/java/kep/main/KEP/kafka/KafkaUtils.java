@@ -37,7 +37,6 @@ public class KafkaUtils {
     private String streamingStateStoreDir;
 
     String messageTopicStorage = "message-topic";
-    String messageTopicOut = "message-out-topic";
     Long messageTopicStorageRetentionMS = 15552000000L;
 
 
@@ -89,7 +88,7 @@ public class KafkaUtils {
 
         consumerProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         consumerProperties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
         consumerProperties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 50);
         return new KafkaConsumer<>(consumerProperties, keyDeserializer, valueDeserializer);

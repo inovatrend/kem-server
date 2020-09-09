@@ -6,7 +6,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-@Document(indexName = "KafkaMessage")
+@Document(indexName = "kafka_message")
 public class KafkaMessage {
 
     @Id
@@ -16,6 +16,9 @@ public class KafkaMessage {
 
     @JsonProperty("message")
     public String message;
+
+    @JsonProperty("senderUsername")
+    public String senderUsername;
 
     @JsonProperty("senderUserId")
     public Long senderUserId;

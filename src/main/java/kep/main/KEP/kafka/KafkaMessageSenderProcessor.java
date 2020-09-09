@@ -19,7 +19,7 @@ public class KafkaMessageSenderProcessor {
 
     public void startProducing(KafkaMessage kafkaMessage) throws ExecutionException, InterruptedException {
 
-        String conversationTopicName = kafkaUtils.messageTopicStorage + "-" + kafkaMessage.senderUserId + kafkaMessage.receiverUserId;
+        String conversationTopicName = kafkaUtils.messageTopicStorage;
         KafkaProducer<String, KafkaMessage> messageProducer = kafkaUtils.createKafkaProducer("all", StringSerializer.class, KafkaJsonSerializer.class);
         kafkaUtils.createTopicIfNotExist(conversationTopicName,
                 kafkaUtils.messageTopicStorageRetentionMS, kafkaUtils.defaultReplicaitonFactor);
