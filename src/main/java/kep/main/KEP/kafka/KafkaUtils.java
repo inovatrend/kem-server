@@ -41,25 +41,26 @@ public class KafkaUtils {
 
 
     private final ReentrantLock createTopicLock = new ReentrantLock();
-    ConcurrentHashMap existingTopics  = new ConcurrentHashMap();
+    ConcurrentHashMap existingTopics = new ConcurrentHashMap();
 
-    public void init () throws ExecutionException, InterruptedException {
+    public void init() throws ExecutionException, InterruptedException {
         createTopicIfNotExist(messageTopicStorage, messageTopicStorageRetentionMS, defaultReplicaitonFactor);
     }
 
-    public void createTopicIfNotExist(String topicName, Long messageTopicStorageRetentionMS, String defaultReplicaitonFactor) throws InterruptedException, ExecutionException {
-        //make sure that only one thread can execute
+    public void createTopicIfNotExist(String topicName, Long messageTopicStorageRetentionMS,
+                                      String defaultReplicaitonFactor) throws InterruptedException, ExecutionException {
         synchronized (createTopicLock) {
 
             if (existingTopics.contains(topicName)) {
                 boolean topicExists = kafkaAdmin.listTopics().names().get().contains(topicName);
 
-                if(!topicExists) {
+                if (!topicExists) {
                     Map<String, String> topicConfMap = new HashMap<>();
                     topicConfMap.put(TopicConfig.RETENTION_MS_CONFIG, messageTopicStorageRetentionMS.toString());
-                    topicConfMap.put(TopicConfig.CLEANUP_POLICY_CONFIG,  TopicConfig.CLEANUP_POLICY_DELETE);
+                    topicConfMap.put(TopicConfig.CLEANUP_POLICY_CONFIG, TopicConfig.CLEANUP_POLICY_DELETE);
                     int messageTopicStorageNumPartitions = 3;
-                    NewTopic topic = new NewTopic(topicName, messageTopicStorageNumPartitions, Short.parseShort(defaultReplicaitonFactor))
+                    NewTopic topic = new NewTopic(topicName, messageTopicStorageNumPartitions,
+                            Short.parseShort(defaultReplicaitonFactor))
                             .configs(topicConfMap);
 
                     List<NewTopic> resultTopicList = new ArrayList<>();
@@ -71,7 +72,7 @@ public class KafkaUtils {
         }
     }
 
-    public KafkaProducer<String, KafkaMessage> createKafkaProducer (String ack, Class<StringSerializer> keySerializer, Class<KafkaJsonSerializer> valueSerializer) {
+    public KafkaProducer<String, KafkaMessage> createKafkaProducer(String ack, Class<StringSerializer> keySerializer, Class<KafkaJsonSerializer> valueSerializer) {
         Properties producerProperties = new Properties();
 
         producerProperties.put(ProducerConfig.ACKS_CONFIG, ack);
@@ -83,7 +84,7 @@ public class KafkaUtils {
         return new KafkaProducer<>(producerProperties);
     }
 
-    public Consumer<String, KafkaMessage> createKafkaConsumer (String groupId, StringDeserializer keyDeserializer, JsonDeserializer valueDeserializer) {
+    public Consumer<String, KafkaMessage> createKafkaConsumer(String groupId, StringDeserializer keyDeserializer, JsonDeserializer valueDeserializer) {
         Properties consumerProperties = new Properties();
 
         consumerProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -94,7 +95,7 @@ public class KafkaUtils {
         return new KafkaConsumer<>(consumerProperties, keyDeserializer, valueDeserializer);
     }
 
-    public Properties createPropertiesKafkaStreams (String applicationId, Class<Serdes.StringSerde> keySerde, Class<Serdes.StringSerde> valueSerde, int threads) {
+    public Properties createPropertiesKafkaStreams(String applicationId, Class<Serdes.StringSerde> keySerde, Class<Serdes.StringSerde> valueSerde, int threads) {
         Properties streamProperties = new Properties();
 
         streamProperties.put(StreamsConfig.STATE_DIR_CONFIG, streamingStateStoreDir);

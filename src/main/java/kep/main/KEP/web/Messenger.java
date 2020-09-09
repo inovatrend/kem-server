@@ -20,7 +20,6 @@ public class Messenger {
         this.kafkaMessageElasticsearchProcessor = kafkaMessageElasticsearchProcessor;
     }
 
-
     @RequestMapping("/send")
     public void produceMessageAndSaveItToElastic(@RequestBody(required = false) KafkaMessage kafkaMessage) throws ExecutionException, InterruptedException {
         kafkaMessageSenderProcessor.startProducing(kafkaMessage);

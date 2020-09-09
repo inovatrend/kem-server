@@ -1,6 +1,6 @@
 package kep.main.KEP.kafka;
 
-import kep.main.KEP.elasticsearch.KafkaMessageRepository;
+import kep.main.KEP.elasticsearch.KafkaElasticsearchManager;
 import kep.main.KEP.model.KafkaMessage;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -20,13 +20,13 @@ public class KafkaMessageElasticsearchProcessor {
     public static final String GROUP_ID = "1";
     private final KafkaUtils kafkaUtils;
 
-    private final KafkaMessageRepository kafkaMessageRepository;
+    private final KafkaElasticsearchManager kafkaElasticsearchManager;
 
     private Consumer<String, KafkaMessage> consumer = null;
 
-    public KafkaMessageElasticsearchProcessor(KafkaUtils kafkaUtils, KafkaMessageRepository kafkaMessageRepository) {
+    public KafkaMessageElasticsearchProcessor(KafkaUtils kafkaUtils, KafkaElasticsearchManager kafkaElasticsearchManager) {
         this.kafkaUtils = kafkaUtils;
-        this.kafkaMessageRepository = kafkaMessageRepository;
+        this.kafkaElasticsearchManager = kafkaElasticsearchManager;
     }
 
     @PostConstruct
@@ -44,7 +44,7 @@ public class KafkaMessageElasticsearchProcessor {
 
         if (consumerRecords.count() > 0) {
             consumerRecords.forEach(crv -> {
-                kafkaMessageRepository.save(crv.value());
+                kafkaElasticsearchManager.saveToElastic(crv.value());
             });
         } else {
             consumer.wakeup();
@@ -52,19 +52,19 @@ public class KafkaMessageElasticsearchProcessor {
     }
 
     public List<KafkaMessage> loadFromElasticsearch(Long senderId, Long receiverId) {
-        List<KafkaMessage> resultMessageList = new ArrayList<>();
+        List<KafkaMessage> conversationMessageList = new ArrayList<>();
 
-        List<KafkaMessage> receiverMessageList = kafkaMessageRepository.findAllBySenderUserIdAndReceiverUserIdOrderById(receiverId, senderId);
-        List<KafkaMessage> senderMessageList = kafkaMessageRepository.findAllBySenderUserIdAndReceiverUserIdOrderById(senderId, receiverId);
+        List<KafkaMessage> receiverMessageList = kafkaElasticsearchManager.loadAllMessagesForUser(receiverId, senderId);
+        List<KafkaMessage> senderMessageList = kafkaElasticsearchManager.loadAllMessagesForUser(senderId, receiverId);
 
-        resultMessageList.addAll(senderMessageList);
-        resultMessageList.addAll(receiverMessageList);
+        conversationMessageList.addAll(senderMessageList);
+        conversationMessageList.addAll(receiverMessageList);
 
-        if (resultMessageList.size() > 0) {
-            resultMessageList.sort(Comparator.comparing(kafkaMessage -> kafkaMessage.id));
+        if (conversationMessageList.size() > 0) {
+            conversationMessageList.sort(Comparator.comparing(kafkaMessage -> kafkaMessage.id));
         }
 
-        return resultMessageList;
+        return conversationMessageList;
     }
 
 }
