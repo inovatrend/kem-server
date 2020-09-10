@@ -45,7 +45,6 @@ public class AuthController {
         if (userUtils.isAuthenticated(authentication)) {
             return ResponseEntity.status(HttpStatus.OK).body(jwtTokenUtil.generateToken(userDetails));
         }
-
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 }

@@ -79,7 +79,11 @@ public class KafkaUtils {
         producerProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializer);
         producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializer);
-        producerProperties.put(ProducerConfig.LINGER_MS_CONFIG, 1000);
+        producerProperties.put(ProducerConfig.LINGER_MS_CONFIG, 0);
+        producerProperties.put(ProducerConfig.RETRIES_CONFIG, 10);
+        producerProperties.put(ProducerConfig.BATCH_SIZE_CONFIG, 50000);
+        producerProperties.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, 500);
+        producerProperties.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000);
         producerProperties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
         return new KafkaProducer<>(producerProperties);
     }

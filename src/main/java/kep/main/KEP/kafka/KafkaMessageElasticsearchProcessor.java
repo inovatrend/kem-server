@@ -13,6 +13,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class KafkaMessageElasticsearchProcessor {
@@ -22,7 +23,7 @@ public class KafkaMessageElasticsearchProcessor {
 
     private final KafkaElasticsearchManager kafkaElasticsearchManager;
 
-    private Consumer<String, KafkaMessage> consumer = null;
+    private Consumer<String, KafkaMessage> consumer;
 
     public KafkaMessageElasticsearchProcessor(KafkaUtils kafkaUtils, KafkaElasticsearchManager kafkaElasticsearchManager) {
         this.kafkaUtils = kafkaUtils;
@@ -30,7 +31,10 @@ public class KafkaMessageElasticsearchProcessor {
     }
 
     @PostConstruct
-    private void createKafkaConsumerOnStartup() {
+    private void createKafkaConsumerOnStartup() throws ExecutionException, InterruptedException {
+        kafkaUtils.createTopicIfNotExist(kafkaUtils.messageTopicStorage,
+                kafkaUtils.messageTopicStorageRetentionMS, kafkaUtils.defaultReplicaitonFactor);
+
         consumer = kafkaUtils.createKafkaConsumer(GROUP_ID, new StringDeserializer(), new JsonDeserializer<>(KafkaMessage.class));
 
         List<String> topics = new ArrayList<>();
@@ -40,12 +44,14 @@ public class KafkaMessageElasticsearchProcessor {
     }
 
     public void kafkaElasticsearchReceiver() {
-        ConsumerRecords<String, KafkaMessage> consumerRecords = consumer.poll(Duration.ofMillis(100));
+        synchronized (consumer) {
+            ConsumerRecords<String, KafkaMessage> consumerRecords = consumer.poll(Duration.ofMillis(300));
 
-        if (consumerRecords.count() > 0) {
-            consumerRecords.forEach(crv -> {
-                kafkaElasticsearchManager.saveToElastic(crv.value());
-            });
+            if (consumerRecords.count() > 0) {
+                consumerRecords.forEach(crv -> {
+                    kafkaElasticsearchManager.saveToElastic(crv.value());
+                });
+            }
         }
     }
 

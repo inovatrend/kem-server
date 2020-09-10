@@ -49,7 +49,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 logger.debug("Token expired!", e);
             }
         } else {
-            logger.warn("Jwt token doesn't start with Bearer String...");
+//            logger.warn("Jwt token doesn't start with Bearer String...");
         }
 
         if (username != null &&

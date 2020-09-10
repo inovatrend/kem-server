@@ -6,6 +6,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -13,19 +14,21 @@ public class KafkaMessageSenderProcessor {
 
     private final KafkaUtils kafkaUtils;
 
+    KafkaProducer<String, KafkaMessage> messageProducer;
+
     public KafkaMessageSenderProcessor(KafkaUtils kafkaUtils) {
         this.kafkaUtils = kafkaUtils;
     }
 
-    public void startProducing(KafkaMessage kafkaMessage) throws ExecutionException, InterruptedException {
-
-        String conversationTopicName = kafkaUtils.messageTopicStorage;
-        KafkaProducer<String, KafkaMessage> messageProducer = kafkaUtils.createKafkaProducer("all", StringSerializer.class, KafkaJsonSerializer.class);
-        kafkaUtils.createTopicIfNotExist(conversationTopicName,
+    @PostConstruct
+    private void createProducerOnStartUp() throws ExecutionException, InterruptedException {
+        kafkaUtils.createTopicIfNotExist(kafkaUtils.messageTopicStorage,
                 kafkaUtils.messageTopicStorageRetentionMS, kafkaUtils.defaultReplicaitonFactor);
 
-        messageProducer.send(new ProducerRecord<>(conversationTopicName, kafkaMessage.receiverUserId.toString(), kafkaMessage));
-        messageProducer.flush();
-        messageProducer.close();
+        messageProducer = kafkaUtils.createKafkaProducer("all", StringSerializer.class, KafkaJsonSerializer.class);
+    }
+
+    public void startProducing(KafkaMessage kafkaMessage) {
+        messageProducer.send(new ProducerRecord<>(kafkaUtils.messageTopicStorage, kafkaMessage.receiverUserId.toString(), kafkaMessage));
     }
 }

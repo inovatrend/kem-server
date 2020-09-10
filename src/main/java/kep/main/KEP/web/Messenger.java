@@ -23,12 +23,12 @@ public class Messenger {
     @RequestMapping("/send")
     public void produceMessageAndSaveItToElastic(@RequestBody(required = false) KafkaMessage kafkaMessage) throws ExecutionException, InterruptedException {
         kafkaMessageSenderProcessor.startProducing(kafkaMessage);
-        kafkaMessageElasticsearchProcessor.kafkaElasticsearchReceiver();
 //        kafkaMessageReceiverProcessor.start(kafkaMessage.senderUserId, kafkaMessage.receiverUserId);
     }
 
     @GetMapping("/receive/{senderId}/{receiverId}")
     public List<KafkaMessage> loadMessages(@PathVariable Long senderId, @PathVariable Long receiverId) {
-       return kafkaMessageElasticsearchProcessor.loadFromElasticsearch(senderId, receiverId);
+        kafkaMessageElasticsearchProcessor.kafkaElasticsearchReceiver();
+        return kafkaMessageElasticsearchProcessor.loadFromElasticsearch(senderId, receiverId);
     }
 }
