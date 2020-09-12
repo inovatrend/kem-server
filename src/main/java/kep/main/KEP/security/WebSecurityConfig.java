@@ -1,5 +1,6 @@
 package kep.main.KEP.security;
 
+import kep.main.KEP.model.Permissions;
 import kep.main.KEP.service.UserManagerImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -45,12 +46,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .csrf().disable().cors().and()
-                .regexMatcher("(/kep/(.*))")
-
-                .authorizeRequests(reg -> {
-                    reg
-                            .antMatchers("/kep/user/save").permitAll();
-                })
+                .authorizeRequests()
+                .antMatchers("/user/*").hasAnyAuthority(Permissions.ROLE_USER.name(), Permissions.ROLE_USER.name())
+                .antMatchers("/kep/user/save").permitAll()
+                .and()
                 .exceptionHandling().authenticationEntryPoint(entryPoint)
                 .and()
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

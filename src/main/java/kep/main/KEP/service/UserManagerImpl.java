@@ -2,6 +2,7 @@ package kep.main.KEP.service;
 
 import kep.main.KEP.dao.UserRepository;
 import kep.main.KEP.dto.UserDTO;
+import kep.main.KEP.model.Permissions;
 import kep.main.KEP.model.User;
 import kep.main.KEP.utils.UserUtils;
 import org.apache.logging.log4j.LogManager;
@@ -12,9 +13,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.security.SecureRandom;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UserManagerImpl implements UserManager, UserDetailsService {
@@ -22,9 +26,28 @@ public class UserManagerImpl implements UserManager, UserDetailsService {
     private final UserRepository userRepository;
     private final UserUtils userUtils;
 
+    int strength = 10;
+    BCryptPasswordEncoder bCryptPasswordEncoder =
+            new BCryptPasswordEncoder(strength, new SecureRandom());
+
     public UserManagerImpl(UserRepository userRepository, UserUtils userUtils) {
         this.userRepository = userRepository;
         this.userUtils = userUtils;
+    }
+
+    @PostConstruct
+    private void createAdminUser() {
+        User adminUser = userRepository.findByUsername("admin");
+
+        if (adminUser == null) {
+            Set<Permissions> permissionsSet = new HashSet<>();
+            permissionsSet.add(Permissions.ROLE_ADMIN);
+
+            userRepository.save(new User(9999L, "admin",
+                    bCryptPasswordEncoder.encode("123qweasdyxc"),
+                    bCryptPasswordEncoder.encode("123qweasdyxc"),
+                    "admin", "admin", permissionsSet));
+        }
     }
 
     @Override
@@ -52,6 +75,10 @@ public class UserManagerImpl implements UserManager, UserDetailsService {
     @Override
     public UserDTO save(User user) {
         try {
+            Set<Permissions> permissionsSet = new HashSet<>();
+            permissionsSet.add(Permissions.ROLE_USER);
+            user.setPermissions(permissionsSet);
+
             encodeUserPasswordBCrypt(user);
 
             userRepository.save(user);
@@ -74,9 +101,6 @@ public class UserManagerImpl implements UserManager, UserDetailsService {
     }
 
     private void encodeUserPasswordBCrypt(User user) {
-        int strength = 10;
-        BCryptPasswordEncoder bCryptPasswordEncoder =
-                new BCryptPasswordEncoder(strength, new SecureRandom());
         String encodePassword = bCryptPasswordEncoder.encode(user.getPassword());
         String encodeRePassword = bCryptPasswordEncoder.encode(user.getRepeatPassword());
 

@@ -65,10 +65,9 @@ public class KafkaMessageElasticsearchProcessor {
         conversationMessageList.addAll(receiverMessageList);
 
         if (conversationMessageList.size() > 0) {
-            conversationMessageList.sort(Comparator.comparing(kafkaMessage -> kafkaMessage.id));
+            conversationMessageList.sort(Comparator.comparing(kafkaMessage -> kafkaMessage.id, Comparator.reverseOrder()));
         }
 
         return conversationMessageList;
     }
-
 }

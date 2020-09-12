@@ -21,7 +21,6 @@ public class KepApplication {
 		kafkaUtils.init();
 	}
 
-
 	public static void main(String[] args) {
 		SpringApplication.run(KepApplication.class, args);
 	}
