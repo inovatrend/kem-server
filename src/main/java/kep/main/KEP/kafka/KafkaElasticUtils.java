@@ -23,12 +23,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Service
-public class KafkaUtils {
-    private AdminClient kafkaAdmin;
-
+public class KafkaElasticUtils {
+    public AdminClient kafkaAdmin;
 
     @Value(value = "${kafka.bootstrap.servers}")
     public String bootstrapServers = "127.0.0.1:9092";
+
+    @Value(value = "${elastic.index}")
+    public String elasticIndex;
 
     @Value(value = "${default.topic.replication.factor}")
     public String defaultReplicaitonFactor = "3";
@@ -50,7 +52,6 @@ public class KafkaUtils {
     public void createTopicIfNotExist(String topicName, Long messageTopicStorageRetentionMS,
                                       String defaultReplicaitonFactor) throws InterruptedException, ExecutionException {
         synchronized (createTopicLock) {
-
             if (existingTopics.contains(topicName)) {
                 boolean topicExists = kafkaAdmin.listTopics().names().get().contains(topicName);
 
