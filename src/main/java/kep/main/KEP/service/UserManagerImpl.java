@@ -83,7 +83,7 @@ public class UserManagerImpl implements UserManager, UserDetailsService {
 
             userRepository.save(user);
         } catch (Exception e) {
-            logger.error("User not saved!", e);
+            logger.error("User not saved! {}", e.getMessage());
         }
 
         return userUtils.UserDTOMapper(user);

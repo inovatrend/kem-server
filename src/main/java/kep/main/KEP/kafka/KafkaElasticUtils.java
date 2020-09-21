@@ -1,6 +1,5 @@
 package kep.main.KEP.kafka;
 
-import kep.main.KEP.model.KafkaMessage;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -73,7 +72,7 @@ public class KafkaElasticUtils {
         }
     }
 
-    public KafkaProducer<String, KafkaMessage> createKafkaProducer(String ack, Class<StringSerializer> keySerializer, Class<KafkaJsonSerializer> valueSerializer) {
+    public KafkaProducer createKafkaProducer(String ack, Class<StringSerializer> keySerializer, Class<KafkaJsonSerializer> valueSerializer) {
         Properties producerProperties = new Properties();
 
         producerProperties.put(ProducerConfig.ACKS_CONFIG, ack);
@@ -89,7 +88,7 @@ public class KafkaElasticUtils {
         return new KafkaProducer<>(producerProperties);
     }
 
-    public Consumer<String, KafkaMessage> createKafkaConsumer(String groupId, StringDeserializer keyDeserializer, JsonDeserializer valueDeserializer) {
+    public Consumer createKafkaConsumer(String groupId, StringDeserializer keyDeserializer, JsonDeserializer valueDeserializer) {
         Properties consumerProperties = new Properties();
 
         consumerProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);

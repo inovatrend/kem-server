@@ -2,12 +2,14 @@ package kep.main.KEP.kafka;
 
 import kep.main.KEP.elasticsearch.KafkaElasticsearchManager;
 import kep.main.KEP.model.KafkaMessage;
+import kep.main.KEP.model.KafkaMonitorMetrics;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joda.time.DateTime;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.stereotype.Service;
 
@@ -30,11 +32,14 @@ public class KafkaMessageElasticsearchProcessor {
 
     private final KafkaElasticsearchManager kafkaElasticsearchManager;
 
+    private final KafkaLagProcessor kafkaLagProcessor;
+
     private Consumer<String, KafkaMessage> consumer;
 
-    public KafkaMessageElasticsearchProcessor(KafkaElasticUtils kafkaElasticUtils, KafkaElasticsearchManager kafkaElasticsearchManager) {
+    public KafkaMessageElasticsearchProcessor(KafkaElasticUtils kafkaElasticUtils, KafkaElasticsearchManager kafkaElasticsearchManager, KafkaLagProcessor kafkaLagProcessor) {
         this.kafkaElasticUtils = kafkaElasticUtils;
         this.kafkaElasticsearchManager = kafkaElasticsearchManager;
+        this.kafkaLagProcessor = kafkaLagProcessor;
     }
 
     @PostConstruct
@@ -59,10 +64,13 @@ public class KafkaMessageElasticsearchProcessor {
 
             if (consumerRecords.count() > 0) {
                 consumerRecords.forEach(crv -> {
-                    long topicLag = getTopicLag(crv);
-                    logger.info("Topic {} lag: {} ", kafkaElasticUtils.messageTopicStorage, topicLag);
+                    Long topicLag = processTopicLag(crv.offset(), crv.topic());
+
+                    kafkaLagProcessor.saveKafkaTopicLag(new KafkaMonitorMetrics(DateTime.now().getMillis(), topicLag, crv.topic()));
+
+                    logger.info("Topic {} lag: {} ", crv.topic(), topicLag);
                     try {
-                        kafkaElasticsearchManager.saveToElastic(crv.value());
+                        kafkaElasticsearchManager.saveKafkaMessageToElastic(crv.value());
                     } catch (Exception e) {
                         logger.error("Error while saving to Elasticsearch: {}", e.getMessage());
                     }
@@ -97,8 +105,8 @@ public class KafkaMessageElasticsearchProcessor {
         return conversationMessageList;
     }
 
-    public long getTopicLag(org.apache.kafka.clients.consumer.ConsumerRecord<String, KafkaMessage> crv) {
-        List<TopicPartition> partitions = consumer.partitionsFor(kafkaElasticUtils.messageTopicStorage)
+    public long processTopicLag(long offset, String topicName) {
+        List<TopicPartition> partitions = consumer.partitionsFor(topicName)
                 .stream().map(p -> new TopicPartition(p.topic(), p.partition()))
                 .collect(Collectors.toList());
 
@@ -106,7 +114,7 @@ public class KafkaMessageElasticsearchProcessor {
 
         long topicLag = 0;
         for (Map.Entry<TopicPartition, Long> endOffset : endOffsets.entrySet()) {
-            Long currentOffset = crv.offset();
+            Long currentOffset = offset;
             long partitionLag = endOffset.getValue() - currentOffset;
             topicLag += partitionLag;
         }

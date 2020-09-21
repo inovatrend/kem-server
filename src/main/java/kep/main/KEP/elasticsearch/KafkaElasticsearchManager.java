@@ -7,5 +7,5 @@ import java.util.List;
 public interface KafkaElasticsearchManager {
     List<KafkaMessage> loadAllMessagesForUser(Long senderId, Long receiverId);
 
-    void saveToElastic(KafkaMessage kafkaMessage);
+    void saveKafkaMessageToElastic(KafkaMessage kafkaMessage);
 }

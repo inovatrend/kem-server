@@ -18,7 +18,8 @@ public class KafkaElasticsearchManagerImpl implements KafkaElasticsearchManager 
     }
 
     @Override
-    public void saveToElastic(KafkaMessage kafkaMessage) {
+    public void saveKafkaMessageToElastic(KafkaMessage kafkaMessage) {
         kafkaMessageRepository.save(kafkaMessage);
     }
+
 }
