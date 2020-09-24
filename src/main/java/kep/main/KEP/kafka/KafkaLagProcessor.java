@@ -11,7 +11,7 @@ public class KafkaLagProcessor {
 
     List<KafkaMonitorMetrics> kafkaMonitorMetricsList = new ArrayList<>();
 
-    public void saveKafkaTopicLag(KafkaMonitorMetrics kafkaMonitorMetrics) {
+    public void addKafkaTopicLag(KafkaMonitorMetrics kafkaMonitorMetrics) {
         kafkaMonitorMetricsList.add(kafkaMonitorMetrics);
     }
 

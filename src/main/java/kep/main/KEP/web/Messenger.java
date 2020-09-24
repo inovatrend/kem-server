@@ -6,7 +6,6 @@ import kep.main.KEP.model.KafkaMessage;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/messenger")
@@ -21,14 +20,12 @@ public class Messenger {
     }
 
     @RequestMapping("/send")
-    public void produceMessageAndSaveItToElastic(@RequestBody(required = false) KafkaMessage kafkaMessage) throws ExecutionException, InterruptedException {
+    public void produceMessage(@RequestBody(required = false) KafkaMessage kafkaMessage) {
         kafkaMessageSenderProcessor.startProducing(kafkaMessage);
-//        kafkaMessageReceiverProcessor.start(kafkaMessage.senderUserId, kafkaMessage.receiverUserId);
     }
 
     @GetMapping("/receive/{senderId}/{receiverId}")
-    public List<KafkaMessage> loadMessages(@PathVariable Long senderId, @PathVariable Long receiverId) {
-        kafkaMessageElasticsearchProcessor.kafkaElasticsearchReceiver();
+    public List<KafkaMessage> saveMessageToElasticAndLoadMessageToUser(@PathVariable Long senderId, @PathVariable Long receiverId) {
         return kafkaMessageElasticsearchProcessor.loadFromElasticsearch(senderId, receiverId);
     }
 }

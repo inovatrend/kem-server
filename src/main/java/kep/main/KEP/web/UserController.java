@@ -4,11 +4,8 @@ import kep.main.KEP.dto.UserDTO;
 import kep.main.KEP.model.User;
 import kep.main.KEP.service.UserManager;
 import kep.main.KEP.utils.UserUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,12 +55,5 @@ public class UserController {
         User user = userUtils.UserMapper(userDTO);
 
         return userManager.save(user);
-    }
-
-    @DeleteMapping(value = "/logout")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void logout(HttpSession session, HttpServletRequest request) {
-        session.invalidate();
-        request.getSession().invalidate();
     }
 }

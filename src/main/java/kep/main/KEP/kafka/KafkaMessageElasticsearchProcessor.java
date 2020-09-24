@@ -58,32 +58,15 @@ public class KafkaMessageElasticsearchProcessor {
         logger.debug("Consumer {} successfully subscribed to topics: {}!", consumer, topics);
     }
 
-    public void kafkaElasticsearchReceiver() {
-        synchronized (consumer) {
-            ConsumerRecords<String, KafkaMessage> consumerRecords = consumer.poll(Duration.ofMillis(300));
 
-            if (consumerRecords.count() > 0) {
-                consumerRecords.forEach(crv -> {
-                    Long topicLag = processTopicLag(crv.offset(), crv.topic());
-
-                    kafkaLagProcessor.saveKafkaTopicLag(new KafkaMonitorMetrics(DateTime.now().getMillis(), topicLag, crv.topic()));
-
-                    logger.info("Topic {} lag: {} ", crv.topic(), topicLag);
-                    try {
-                        kafkaElasticsearchManager.saveKafkaMessageToElastic(crv.value());
-                    } catch (Exception e) {
-                        logger.error("Error while saving to Elasticsearch: {}", e.getMessage());
-                    }
-                });
-            }
-        }
-    }
 
     public List<KafkaMessage> loadFromElasticsearch(Long senderId, Long receiverId) {
         List<KafkaMessage> conversationMessageList = new ArrayList<>();
 
         List<KafkaMessage> receiverMessageList;
         List<KafkaMessage> senderMessageList;
+
+        saveMessageToElasticAndProcessTopicLag();
 
         try {
             receiverMessageList = kafkaElasticsearchManager.loadAllMessagesForUser(receiverId, senderId);
@@ -103,6 +86,27 @@ public class KafkaMessageElasticsearchProcessor {
         }
 
         return conversationMessageList;
+    }
+
+    private void saveMessageToElasticAndProcessTopicLag() {
+        synchronized (consumer) {
+            ConsumerRecords<String, KafkaMessage> consumerRecords = consumer.poll(Duration.ofMillis(5));
+
+            if (consumerRecords.count() > 0) {
+                consumerRecords.forEach(crv -> {
+                    Long topicLag = processTopicLag(crv.offset(), crv.topic());
+
+                    kafkaLagProcessor.addKafkaTopicLag(new KafkaMonitorMetrics(DateTime.now().getMillis(), topicLag, crv.topic()));
+
+                    logger.info("Topic {} lag: {} ", crv.topic(), topicLag);
+                    try {
+                        kafkaElasticsearchManager.saveKafkaMessageToElastic(crv.value());
+                    } catch (Exception e) {
+                        logger.error("Error while saving to Elasticsearch: {}", e.getMessage());
+                    }
+                });
+            }
+        }
     }
 
     public long processTopicLag(long offset, String topicName) {
