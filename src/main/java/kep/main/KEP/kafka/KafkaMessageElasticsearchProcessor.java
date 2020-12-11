@@ -58,15 +58,11 @@ public class KafkaMessageElasticsearchProcessor {
         logger.debug("Consumer {} successfully subscribed to topics: {}!", consumer, topics);
     }
 
-
-
     public List<KafkaMessage> loadFromElasticsearch(Long senderId, Long receiverId) {
         List<KafkaMessage> conversationMessageList = new ArrayList<>();
 
         List<KafkaMessage> receiverMessageList;
         List<KafkaMessage> senderMessageList;
-
-        saveMessageToElasticAndProcessTopicLag();
 
         try {
             receiverMessageList = kafkaElasticsearchManager.loadAllMessagesForUser(receiverId, senderId);
@@ -88,7 +84,7 @@ public class KafkaMessageElasticsearchProcessor {
         return conversationMessageList;
     }
 
-    private void saveMessageToElasticAndProcessTopicLag() {
+    public void saveMessageToElasticAndProcessTopicLag() {
         synchronized (consumer) {
             ConsumerRecords<String, KafkaMessage> consumerRecords = consumer.poll(Duration.ofMillis(5));
 

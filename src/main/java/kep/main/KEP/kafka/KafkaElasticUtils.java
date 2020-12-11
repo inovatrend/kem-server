@@ -95,7 +95,7 @@ public class KafkaElasticUtils {
         consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
         consumerProperties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
-        consumerProperties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 50);
+        consumerProperties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1000);
         return new KafkaConsumer<>(consumerProperties, keyDeserializer, valueDeserializer);
     }
 

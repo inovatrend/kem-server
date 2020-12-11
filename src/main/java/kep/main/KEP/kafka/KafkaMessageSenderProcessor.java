@@ -29,7 +29,7 @@ public class KafkaMessageSenderProcessor {
                 kafkaElasticUtils.messageTopicStorageRetentionMS, kafkaElasticUtils.defaultReplicaitonFactor);
 
         try {
-            messageProducer = kafkaElasticUtils.createKafkaProducer("all", StringSerializer.class, KafkaJsonSerializer.class);
+            messageProducer = kafkaElasticUtils.createKafkaProducer("1", StringSerializer.class, KafkaJsonSerializer.class);
             logger.debug("Successfully created kafka producer: {}", messageProducer);
         } catch (Exception e) {
             logger.error("Error while creating Kafka producer: {}", e.getMessage());

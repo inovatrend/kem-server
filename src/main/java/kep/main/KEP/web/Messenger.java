@@ -26,6 +26,7 @@ public class Messenger {
 
     @GetMapping("/receive/{senderId}/{receiverId}")
     public List<KafkaMessage> saveMessageToElasticAndLoadMessageToUser(@PathVariable Long senderId, @PathVariable Long receiverId) {
+        kafkaMessageElasticsearchProcessor.saveMessageToElasticAndProcessTopicLag();
         return kafkaMessageElasticsearchProcessor.loadFromElasticsearch(senderId, receiverId);
     }
 }

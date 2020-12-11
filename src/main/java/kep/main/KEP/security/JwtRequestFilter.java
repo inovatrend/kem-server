@@ -18,8 +18,6 @@ import java.io.IOException;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
-
-
     public static final String AUTHORIZATION = "Authorization";
 
     private final JwtTokenUtil jwtTokenUtil;
@@ -55,7 +53,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (username != null &&
                 SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails user = this.userManagerImpl.loadUserByUsername(username);
-
 
             if (jwtTokenUtil.validateToken(jwtToken, user)) {
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
