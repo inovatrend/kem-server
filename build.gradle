@@ -31,6 +31,7 @@ dependencies {
 	implementation 'org.apache.kafka:kafka-streams'
 	compile 'org.apache.kafka:kafka-clients:2.6.0'
 	compile 'com.google.code.gson:gson:2.8.6'
+	implementation 'org.springframework.kafka:spring-kafka'
 	compileOnly 'org.projectlombok:lombok'
 	compile 'org.apache.logging.log4j:log4j-core:2.8.2'
 	annotationProcessor 'org.projectlombok:lombok'

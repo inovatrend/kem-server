@@ -14,6 +14,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -40,6 +41,12 @@ public class KafkaMessageElasticsearchProcessor {
         this.kafkaElasticUtils = kafkaElasticUtils;
         this.kafkaElasticsearchManager = kafkaElasticsearchManager;
         this.kafkaLagProcessor = kafkaLagProcessor;
+    }
+
+    @PreDestroy
+    public void onDestroy() throws Exception {
+        logger.debug("Destroying consumer: {}", consumer);
+        consumer.close();
     }
 
     @PostConstruct

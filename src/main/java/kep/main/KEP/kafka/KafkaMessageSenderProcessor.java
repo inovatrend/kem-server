@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -21,6 +22,13 @@ public class KafkaMessageSenderProcessor {
 
     public KafkaMessageSenderProcessor(KafkaElasticUtils kafkaElasticUtils) {
         this.kafkaElasticUtils = kafkaElasticUtils;
+    }
+
+    @PreDestroy
+    public void onDestroy() throws Exception {
+        logger.debug("Destroying producer: {}", messageProducer);
+        messageProducer.flush();
+        messageProducer.close();
     }
 
     @PostConstruct
