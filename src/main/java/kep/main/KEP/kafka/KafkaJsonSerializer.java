@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.Map;
 
 public class KafkaJsonSerializer implements Serializer {
-    private Logger logger = LogManager.getLogger(this.getClass());
+    private final Logger logger = LogManager.getLogger(this.getClass());
 
     @Override
     public void configure(Map configs, boolean isKey) {

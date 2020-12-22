@@ -33,8 +33,8 @@ public class KafkaMessageSenderProcessor {
 
     @PostConstruct
     private void createProducerOnStartUp() throws ExecutionException, InterruptedException {
-        kafkaElasticUtils.createTopicIfNotExist(kafkaElasticUtils.messageTopicStorage,
-                kafkaElasticUtils.messageTopicStorageRetentionMS, kafkaElasticUtils.defaultReplicaitonFactor);
+        kafkaElasticUtils.createTopicIfNotExist(kafkaElasticUtils.messageStoreTopic,
+                kafkaElasticUtils.messageTopicStorageRetentionMS, kafkaElasticUtils.defaultReplicationFactor);
         try {
             messageProducer = kafkaElasticUtils.createKafkaProducer("all", StringSerializer.class, KafkaJsonSerializer.class);
             logger.debug("Successfully created kafka producer: {}", messageProducer);
@@ -45,10 +45,10 @@ public class KafkaMessageSenderProcessor {
 
     public void startProducing(KafkaMessage kafkaMessage) {
         try {
-            messageProducer.send(new ProducerRecord<>(kafkaElasticUtils.messageTopicStorage, kafkaMessage.receiverUserId.toString(), kafkaMessage));
-            logger.debug("Message successfully sent to topic: {} with receiver id: {}", kafkaElasticUtils.messageTopicStorage, kafkaMessage.receiverUserId.toString());
+            messageProducer.send(new ProducerRecord<>(kafkaElasticUtils.messageStoreTopic, kafkaMessage.receiverUserId.toString(), kafkaMessage));
+            logger.debug("Message successfully sent to topic: {} with receiver id: {}", kafkaElasticUtils.messageStoreTopic, kafkaMessage.receiverUserId.toString());
         } catch (Exception e) {
-            logger.error("Error sending message with receiver id: {} - to topic: {}, with error: {} ", kafkaMessage.receiverUserId.toString(), kafkaElasticUtils.messageTopicStorage, e.getMessage());
+            logger.error("Error sending message with receiver id: {} - to topic: {}, with error: {} ", kafkaMessage.receiverUserId.toString(), kafkaElasticUtils.messageStoreTopic, e.getMessage());
         }
     }
 }

@@ -32,12 +32,12 @@ public class KafkaElasticUtils {
     public String elasticIndex;
 
     @Value(value = "${default.topic.replication.factor}")
-    public String defaultReplicaitonFactor = "3";
+    public String defaultReplicationFactor = "3";
 
     @Value(value = "${streaming.state.store.dir}")
     private String streamingStateStoreDir;
 
-    String messageTopicStorage = "message-topic";
+    String messageStoreTopic = "message-topic";
     Long messageTopicStorageRetentionMS = 15552000000L;
 
 
@@ -45,11 +45,11 @@ public class KafkaElasticUtils {
     ConcurrentHashMap existingTopics = new ConcurrentHashMap();
 
     public void init() throws ExecutionException, InterruptedException {
-        createTopicIfNotExist(messageTopicStorage, messageTopicStorageRetentionMS, defaultReplicaitonFactor);
+        createTopicIfNotExist(messageStoreTopic, messageTopicStorageRetentionMS, defaultReplicationFactor);
     }
 
     public void createTopicIfNotExist(String topicName, Long messageTopicStorageRetentionMS,
-                                      String defaultReplicaitonFactor) throws InterruptedException, ExecutionException {
+                                      String defaultReplicationFactor) throws InterruptedException, ExecutionException {
         synchronized (createTopicLock) {
             if (existingTopics.contains(topicName)) {
                 boolean topicExists = kafkaAdmin.listTopics().names().get().contains(topicName);
@@ -60,7 +60,7 @@ public class KafkaElasticUtils {
                     topicConfMap.put(TopicConfig.CLEANUP_POLICY_CONFIG, TopicConfig.CLEANUP_POLICY_DELETE);
                     int messageTopicStorageNumPartitions = 3;
                     NewTopic topic = new NewTopic(topicName, messageTopicStorageNumPartitions,
-                            Short.parseShort(defaultReplicaitonFactor))
+                            Short.parseShort(defaultReplicationFactor))
                             .configs(topicConfMap);
 
                     List<NewTopic> resultTopicList = new ArrayList<>();

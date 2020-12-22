@@ -7,6 +7,7 @@ import kep.main.KEP.model.User;
 import kep.main.KEP.utils.UserUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -26,6 +27,9 @@ public class UserManagerImpl implements UserManager, UserDetailsService {
     private final UserRepository userRepository;
     private final UserUtils userUtils;
 
+    @Value("${admin.password}")
+    private String adminPassword;
+
     int strength = 10;
     BCryptPasswordEncoder bCryptPasswordEncoder =
             new BCryptPasswordEncoder(strength, new SecureRandom());
@@ -44,8 +48,8 @@ public class UserManagerImpl implements UserManager, UserDetailsService {
             permissionsSet.add(Permissions.ROLE_ADMIN);
 
             userRepository.save(new User(9999L, "admin",
-                    bCryptPasswordEncoder.encode("123qweasdyxc"),
-                    bCryptPasswordEncoder.encode("123qweasdyxc"),
+                    bCryptPasswordEncoder.encode(adminPassword),
+                    bCryptPasswordEncoder.encode(adminPassword),
                     "admin", "admin", permissionsSet));
         }
     }

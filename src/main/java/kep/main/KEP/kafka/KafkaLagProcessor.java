@@ -18,5 +18,4 @@ public class KafkaLagProcessor {
     public List<KafkaMonitorMetrics> returnKafkaTopicLag() {
             return kafkaMonitorMetricsList;
     }
-
 }

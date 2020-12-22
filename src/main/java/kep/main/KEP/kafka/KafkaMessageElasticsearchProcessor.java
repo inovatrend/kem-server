@@ -51,13 +51,13 @@ public class KafkaMessageElasticsearchProcessor {
 
     @PostConstruct
     private void createKafkaConsumerOnStartup() throws ExecutionException, InterruptedException {
-        kafkaElasticUtils.createTopicIfNotExist(kafkaElasticUtils.messageTopicStorage,
-                kafkaElasticUtils.messageTopicStorageRetentionMS, kafkaElasticUtils.defaultReplicaitonFactor);
+        kafkaElasticUtils.createTopicIfNotExist(kafkaElasticUtils.messageStoreTopic,
+                kafkaElasticUtils.messageTopicStorageRetentionMS, kafkaElasticUtils.defaultReplicationFactor);
 
         consumer = kafkaElasticUtils.createKafkaConsumer(GROUP_ID, new StringDeserializer(), new JsonDeserializer<>(KafkaMessage.class));
 
         List<String> topics = new ArrayList<>();
-        topics.add(kafkaElasticUtils.messageTopicStorage);
+        topics.add(kafkaElasticUtils.messageStoreTopic);
 
         logger.debug("Consumer {} successfully created!", consumer);
 
@@ -82,7 +82,7 @@ public class KafkaMessageElasticsearchProcessor {
         }
 
         if (conversationMessageList.size() > 0) {
-            logger.debug(" Number of records: {} - pulled out of ES index: {}! For sender user with id: {} and receiver user with id: {}",
+            logger.debug(" Number of records: {} - pulled out of ES: {}! For sender user with id: {} and receiver user with id: {}",
                     conversationMessageList.size(), kafkaElasticUtils.elasticIndex, senderId, receiverId);
 
             conversationMessageList.sort(Comparator.comparing(kafkaMessage -> kafkaMessage.id, Comparator.reverseOrder()));
