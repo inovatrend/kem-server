@@ -90,7 +90,7 @@ public class UserManagerImpl implements UserManager, UserDetailsService {
             logger.error("User not saved! {}", e.getMessage());
         }
 
-        return userUtils.UserDTOMapper(user);
+        return userUtils.userDTOMapper(user);
     }
 
     @Override

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserUtils {
 
-    public UserDTO UserDTOMapper(User user) {
+    public UserDTO userDTOMapper(User user) {
         return new UserDTO(
                 user.getUserId(),
                 user.getUsername(),
@@ -20,7 +20,7 @@ public class UserUtils {
                 user.getPermissions());
     }
 
-    public User UserMapper(UserDTO userDTO) {
+    public User userMapper(UserDTO userDTO) {
         return new User(
                 userDTO.getUserId(),
                 userDTO.getUsername(),

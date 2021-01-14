@@ -27,7 +27,7 @@ public class UserController {
 
         User user = userManager.getUser(userId);
 
-        return userUtils.UserDTOMapper(user);
+        return userUtils.userDTOMapper(user);
     }
 
     @GetMapping("/getByUsername")
@@ -35,7 +35,7 @@ public class UserController {
 
         User user = userManager.getFullUserByUsername(username);
 
-        return userUtils.UserDTOMapper(user);
+        return userUtils.userDTOMapper(user);
     }
 
     @GetMapping("/getAllUsers")
@@ -44,7 +44,7 @@ public class UserController {
         List<UserDTO> userDTOs = new ArrayList<>();
 
         users.forEach(user -> {
-            userDTOs.add(userUtils.UserDTOMapper(user));
+            userDTOs.add(userUtils.userDTOMapper(user));
         });
         return userDTOs;
     }
@@ -52,7 +52,7 @@ public class UserController {
     @PostMapping("/save")
     private UserDTO save (@RequestBody UserDTO userDTO) {
 
-        User user = userUtils.UserMapper(userDTO);
+        User user = userUtils.userMapper(userDTO);
 
         return userManager.save(user);
     }
