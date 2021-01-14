@@ -16,7 +16,7 @@ public class KafkaMonitoringController {
     }
 
     @RequestMapping("/lag")
-    public List<KafkaMonitorMetrics> produceMessageAndSaveItToElastic() {
-        return kafkaLagProcessor.returnKafkaTopicLag();
+    public List<KafkaMonitorMetrics> processConsumerLag() {
+        return kafkaLagProcessor.returnKafkaConsumerLag();
     }
 }

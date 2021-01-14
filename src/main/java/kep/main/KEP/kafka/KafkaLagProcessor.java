@@ -15,7 +15,7 @@ public class KafkaLagProcessor {
         kafkaMonitorMetricsList.add(kafkaMonitorMetrics);
     }
 
-    public List<KafkaMonitorMetrics> returnKafkaTopicLag() {
+    public List<KafkaMonitorMetrics> returnKafkaConsumerLag() {
             return kafkaMonitorMetricsList;
     }
 }
