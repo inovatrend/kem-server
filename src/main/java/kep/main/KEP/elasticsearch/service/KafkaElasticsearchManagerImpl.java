@@ -1,5 +1,7 @@
-package kep.main.KEP.elasticsearch;
+package kep.main.KEP.elasticsearch.service;
 
+import kep.main.KEP.elasticsearch.repository.KafkaMessageRepository;
+import kep.main.KEP.model.KafkaBlockUser;
 import kep.main.KEP.model.KafkaMessage;
 import org.springframework.stereotype.Service;
 
@@ -21,5 +23,4 @@ public class KafkaElasticsearchManagerImpl implements KafkaElasticsearchManager 
     public void saveKafkaMessageToElastic(KafkaMessage kafkaMessage) {
         kafkaMessageRepository.save(kafkaMessage);
     }
-
 }

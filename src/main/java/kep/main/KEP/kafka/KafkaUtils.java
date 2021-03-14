@@ -22,7 +22,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Service
-public class KafkaElasticUtils {
+public class KafkaUtils {
     public AdminClient kafkaAdmin;
 
     @Value(value = "${kafka.bootstrap.servers}")
@@ -32,12 +32,13 @@ public class KafkaElasticUtils {
     public String elasticIndex;
 
     @Value(value = "${default.topic.replication.factor}")
-    public String defaultReplicationFactor = "3";
+    public String defaultReplicaitonFactor = "3";
 
     @Value(value = "${streaming.state.store.dir}")
     private String streamingStateStoreDir;
 
-    String messageStoreTopic = "message-topic";
+    String messageTopicStorage = "message-topic";
+    String blockTopic = "block-topic";
     Long messageTopicStorageRetentionMS = 15552000000L;
 
 
@@ -45,11 +46,12 @@ public class KafkaElasticUtils {
     ConcurrentHashMap existingTopics = new ConcurrentHashMap();
 
     public void init() throws ExecutionException, InterruptedException {
-        createTopicIfNotExist(messageStoreTopic, messageTopicStorageRetentionMS, defaultReplicationFactor);
+        createTopicIfNotExist(messageTopicStorage, messageTopicStorageRetentionMS, defaultReplicaitonFactor);
+        createTopicIfNotExist(blockTopic, messageTopicStorageRetentionMS, defaultReplicaitonFactor);
     }
 
     public void createTopicIfNotExist(String topicName, Long messageTopicStorageRetentionMS,
-                                      String defaultReplicationFactor) throws InterruptedException, ExecutionException {
+                                      String defaultReplicaitonFactor) throws InterruptedException, ExecutionException {
         synchronized (createTopicLock) {
             if (existingTopics.contains(topicName)) {
                 boolean topicExists = kafkaAdmin.listTopics().names().get().contains(topicName);
@@ -60,7 +62,7 @@ public class KafkaElasticUtils {
                     topicConfMap.put(TopicConfig.CLEANUP_POLICY_CONFIG, TopicConfig.CLEANUP_POLICY_DELETE);
                     int messageTopicStorageNumPartitions = 3;
                     NewTopic topic = new NewTopic(topicName, messageTopicStorageNumPartitions,
-                            Short.parseShort(defaultReplicationFactor))
+                            Short.parseShort(defaultReplicaitonFactor))
                             .configs(topicConfMap);
 
                     List<NewTopic> resultTopicList = new ArrayList<>();

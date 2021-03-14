@@ -1,6 +1,6 @@
 package kep.main.KEP;
 
-import kep.main.KEP.kafka.KafkaElasticUtils;
+import kep.main.KEP.kafka.KafkaUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -10,15 +10,15 @@ import java.util.concurrent.ExecutionException;
 @SpringBootApplication
 public class KepApplication {
 
-	private final KafkaElasticUtils kafkaElasticUtils;
+	private final KafkaUtils kafkaUtils;
 
-	public KepApplication(KafkaElasticUtils kafkaElasticUtils) {
-		this.kafkaElasticUtils = kafkaElasticUtils;
+	public KepApplication(KafkaUtils kafkaUtils) {
+		this.kafkaUtils = kafkaUtils;
 	}
 
 	@PostConstruct
 	public void initialize() throws ExecutionException, InterruptedException {
-		kafkaElasticUtils.init();
+		kafkaUtils.init();
 	}
 
 	public static void main(String[] args) {
