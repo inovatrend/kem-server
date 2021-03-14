@@ -1,4 +1,4 @@
-package kep.main.KEP.elasticsearch;
+package kep.main.KEP.elasticsearch.repository;
 
 import kep.main.KEP.model.KafkaMessage;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;

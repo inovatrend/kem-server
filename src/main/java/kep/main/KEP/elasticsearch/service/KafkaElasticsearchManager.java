@@ -1,5 +1,6 @@
-package kep.main.KEP.elasticsearch;
+package kep.main.KEP.elasticsearch.service;
 
+import kep.main.KEP.model.KafkaBlockUser;
 import kep.main.KEP.model.KafkaMessage;
 
 import java.util.List;

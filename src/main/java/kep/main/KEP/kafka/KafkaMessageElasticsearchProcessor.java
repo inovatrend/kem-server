@@ -1,6 +1,6 @@
 package kep.main.KEP.kafka;
 
-import kep.main.KEP.elasticsearch.KafkaElasticsearchManager;
+import kep.main.KEP.elasticsearch.service.KafkaElasticsearchManager;
 import kep.main.KEP.model.KafkaMessage;
 import kep.main.KEP.model.KafkaMonitorMetrics;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -29,7 +29,7 @@ public class KafkaMessageElasticsearchProcessor {
 
 
     public static final String GROUP_ID = "1";
-    private final KafkaElasticUtils kafkaElasticUtils;
+    private final KafkaUtils kafkaUtils;
 
     private final KafkaElasticsearchManager kafkaElasticsearchManager;
 
@@ -37,8 +37,8 @@ public class KafkaMessageElasticsearchProcessor {
 
     private Consumer<String, KafkaMessage> consumer;
 
-    public KafkaMessageElasticsearchProcessor(KafkaElasticUtils kafkaElasticUtils, KafkaElasticsearchManager kafkaElasticsearchManager, KafkaLagProcessor kafkaLagProcessor) {
-        this.kafkaElasticUtils = kafkaElasticUtils;
+    public KafkaMessageElasticsearchProcessor(KafkaUtils kafkaUtils, KafkaElasticsearchManager kafkaElasticsearchManager, KafkaLagProcessor kafkaLagProcessor) {
+        this.kafkaUtils = kafkaUtils;
         this.kafkaElasticsearchManager = kafkaElasticsearchManager;
         this.kafkaLagProcessor = kafkaLagProcessor;
     }
@@ -51,13 +51,13 @@ public class KafkaMessageElasticsearchProcessor {
 
     @PostConstruct
     private void createKafkaConsumerOnStartup() throws ExecutionException, InterruptedException {
-        kafkaElasticUtils.createTopicIfNotExist(kafkaElasticUtils.messageTopicStorage,
-                kafkaElasticUtils.messageTopicStorageRetentionMS, kafkaElasticUtils.defaultReplicaitonFactor);
+        kafkaUtils.createTopicIfNotExist(kafkaUtils.messageTopicStorage,
+                kafkaUtils.messageTopicStorageRetentionMS, kafkaUtils.defaultReplicaitonFactor);
 
-        consumer = kafkaElasticUtils.createKafkaConsumer(GROUP_ID, new StringDeserializer(), new JsonDeserializer<>(KafkaMessage.class));
+        consumer = kafkaUtils.createKafkaConsumer(GROUP_ID, new StringDeserializer(), new JsonDeserializer<>(KafkaMessage.class));
 
         List<String> topics = new ArrayList<>();
-        topics.add(kafkaElasticUtils.messageTopicStorage);
+        topics.add(kafkaUtils.messageTopicStorage);
 
         logger.debug("Consumer {} successfully created!", consumer);
 
@@ -83,7 +83,7 @@ public class KafkaMessageElasticsearchProcessor {
 
         if (conversationMessageList.size() > 0) {
             logger.debug(" Number of records: {} - pulled out of ES index: {}! For sender user with id: {} and receiver user with id: {}",
-                    conversationMessageList.size(), kafkaElasticUtils.elasticIndex, senderId, receiverId);
+                    conversationMessageList.size(), kafkaUtils.elasticIndex, senderId, receiverId);
 
             conversationMessageList.sort(Comparator.comparing(kafkaMessage -> kafkaMessage.id, Comparator.reverseOrder()));
         }
@@ -105,7 +105,7 @@ public class KafkaMessageElasticsearchProcessor {
                     try {
                         kafkaElasticsearchManager.saveKafkaMessageToElastic(crv.value());
                     } catch (Exception e) {
-                        logger.error("Error while saving to Elasticsearch: {}", e.getMessage());
+                        logger.error("Error while saving message to Elasticsearch: {}", e.getMessage());
                     }
                 });
             }

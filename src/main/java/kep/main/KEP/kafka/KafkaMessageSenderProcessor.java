@@ -16,12 +16,12 @@ import java.util.concurrent.ExecutionException;
 public class KafkaMessageSenderProcessor {
     private static final Logger logger = LogManager.getLogger(KafkaMessageSenderProcessor.class);
 
-    private final KafkaElasticUtils kafkaElasticUtils;
+    private final KafkaUtils kafkaUtils;
 
     KafkaProducer<String, KafkaMessage> messageProducer;
 
-    public KafkaMessageSenderProcessor(KafkaElasticUtils kafkaElasticUtils) {
-        this.kafkaElasticUtils = kafkaElasticUtils;
+    public KafkaMessageSenderProcessor(KafkaUtils kafkaUtils) {
+        this.kafkaUtils = kafkaUtils;
     }
 
     @PreDestroy
@@ -33,10 +33,10 @@ public class KafkaMessageSenderProcessor {
 
     @PostConstruct
     private void createProducerOnStartUp() throws ExecutionException, InterruptedException {
-        kafkaElasticUtils.createTopicIfNotExist(kafkaElasticUtils.messageTopicStorage,
-                kafkaElasticUtils.messageTopicStorageRetentionMS, kafkaElasticUtils.defaultReplicaitonFactor);
+        kafkaUtils.createTopicIfNotExist(kafkaUtils.messageTopicStorage,
+                kafkaUtils.messageTopicStorageRetentionMS, kafkaUtils.defaultReplicaitonFactor);
         try {
-            messageProducer = kafkaElasticUtils.createKafkaProducer("all", StringSerializer.class, KafkaJsonSerializer.class);
+            messageProducer = kafkaUtils.createKafkaProducer("all", StringSerializer.class, KafkaJsonSerializer.class);
             logger.debug("Successfully created kafka producer: {}", messageProducer);
         } catch (Exception e) {
             logger.error("Error while creating Kafka producer: {}", e.getMessage());
@@ -45,10 +45,10 @@ public class KafkaMessageSenderProcessor {
 
     public void startProducing(KafkaMessage kafkaMessage) {
         try {
-            messageProducer.send(new ProducerRecord<>(kafkaElasticUtils.messageTopicStorage, kafkaMessage.receiverUserId.toString(), kafkaMessage));
-            logger.debug("Message successfully sent to topic: {} with receiver id: {}", kafkaElasticUtils.messageTopicStorage, kafkaMessage.receiverUserId.toString());
+            messageProducer.send(new ProducerRecord<>(kafkaUtils.messageTopicStorage, kafkaMessage.receiverUserId.toString(), kafkaMessage));
+            logger.debug("Message successfully sent to topic: {} with receiver id: {}", kafkaUtils.messageTopicStorage, kafkaMessage.receiverUserId.toString());
         } catch (Exception e) {
-            logger.error("Error sending message with receiver id: {} - to topic: {}, with error: {} ", kafkaMessage.receiverUserId.toString(), kafkaElasticUtils.messageTopicStorage, e.getMessage());
+            logger.error("Error sending message with receiver id: {} - to topic: {}, with error: {} ", kafkaMessage.receiverUserId.toString(), kafkaUtils.messageTopicStorage, e.getMessage());
         }
     }
 }

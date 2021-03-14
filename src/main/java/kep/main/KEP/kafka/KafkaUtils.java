@@ -22,7 +22,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Service
-public class KafkaElasticUtils {
+public class KafkaUtils {
     public AdminClient kafkaAdmin;
 
     @Value(value = "${kafka.bootstrap.servers}")
@@ -38,6 +38,7 @@ public class KafkaElasticUtils {
     private String streamingStateStoreDir;
 
     String messageTopicStorage = "message-topic";
+    String blockTopic = "block-topic";
     Long messageTopicStorageRetentionMS = 15552000000L;
 
 
@@ -46,6 +47,7 @@ public class KafkaElasticUtils {
 
     public void init() throws ExecutionException, InterruptedException {
         createTopicIfNotExist(messageTopicStorage, messageTopicStorageRetentionMS, defaultReplicaitonFactor);
+        createTopicIfNotExist(blockTopic, messageTopicStorageRetentionMS, defaultReplicaitonFactor);
     }
 
     public void createTopicIfNotExist(String topicName, Long messageTopicStorageRetentionMS,
