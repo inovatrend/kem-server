@@ -30,6 +30,7 @@ dependencies {
 	runtime 'org.postgresql:postgresql'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.apache.kafka:kafka-streams'
+	implementation 'org.springframework.kafka:spring-kafka:2.6.6'
 	compile 'org.apache.kafka:kafka-clients:2.6.0'
 	compile 'com.google.code.gson:gson:2.8.6'
 	implementation 'org.springframework.kafka:spring-kafka'

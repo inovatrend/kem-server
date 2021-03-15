@@ -6,6 +6,7 @@ import kep.main.KEP.model.KafkaMessage;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.connect.json.JsonDeserializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -49,7 +50,7 @@ public class KafkaBlockUserElasticsearchProcessor {
         kafkaUtils.createTopicIfNotExist(kafkaUtils.messageTopicStorage,
                 kafkaUtils.messageTopicStorageRetentionMS, kafkaUtils.defaultReplicaitonFactor);
 
-        consumer = kafkaUtils.createKafkaConsumer(GROUP_ID, new StringDeserializer(), new JsonDeserializer<>(KafkaMessage.class));
+        consumer = kafkaUtils.createKafkaConsumer(GROUP_ID, new StringDeserializer(), new JsonDeserializer<>(KafkaBlockUser.class));
 
         List<String> topics = new ArrayList<>();
         topics.add(kafkaUtils.messageTopicStorage);
